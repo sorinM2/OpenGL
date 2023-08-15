@@ -12,7 +12,8 @@ int main(void)
     window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
     if (!window)
     {
-        //cuie
+
+        //////////////coie
         glfwTerminate();
         return -1;
     }
