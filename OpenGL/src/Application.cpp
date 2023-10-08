@@ -100,23 +100,36 @@ int main(int argc, char** argv) {
 	std::cout << glGetString(GL_VERSION) << std::endl;
 
 	float points[] = {
-		-0.5, -0.5,
-	    0.5, -0.5,
-		0.5, 0.5,
+		-0.5, -0.5,//0
+	    0.5, -0.5,//1
+		0.5, 0.5,//2
 
-		0.5, 0.5,
-		-0.5, 0.5,
-		-0.5, -0.5
+		//0.5, 0.5,//2
+		-0.5, 0.5,//3
+		//-0.5, -0.5//0
 	};
+
+	unsigned int indices[] = { // obligatoriu unsigned
+		0, 1, 2,
+		2, 3, 0
+	};
+	//vertex buffer
 	unsigned int buffer;
 	glCreateBuffers(1, &buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, buffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 4 * 2, points, GL_STATIC_DRAW);
 
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 2, points, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
 
+	//index buffer
+	unsigned int ibo; //ibo = index buffer object
+	glCreateBuffers(1, &ibo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int ) * 6 * 2, indices, GL_STATIC_DRAW);
 
+	//bufferele sunt conectate
+	//GL_ELEMENT_ARRAY_BUFFER ii spune ca sunt indicii pentru GL_ARRAY_BUFFER
 	ShaderProgramSource source = ParseShader("res/shaders/Basic.shader");
 	unsigned int shader = CreateShader(source.VertexSource, source.FragemntSource);
 	glUseProgram(shader);
@@ -129,7 +142,8 @@ int main(int argc, char** argv) {
 	while (!glfwWindowShouldClose(window)) {
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);//param 2 e nr de indici pe care il desenam
+
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
