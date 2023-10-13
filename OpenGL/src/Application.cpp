@@ -105,6 +105,12 @@ int main(int argc, char** argv) {
 	GLFWwindow* window;
 	if (!glfwInit())
 		return -1;
+
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
+
+
 	window = glfwCreateWindow(1200, 800, "OpenGL", NULL, NULL);
 
 	if (!window) {
@@ -129,19 +135,22 @@ int main(int argc, char** argv) {
 		0, 1, 2,
 		2, 3, 0
 	};
+
+	unsigned int VAO;
+	GLCall(glGenVertexArrays(1, &VAO));
+	GLCall(glBindVertexArray(VAO));
 	unsigned int buffer;
 	GLCall(glCreateBuffers(1, &buffer));
 	GLCall(glBindBuffer(GL_ARRAY_BUFFER, buffer));
 	GLCall(glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 4 * 2, points, GL_STATIC_DRAW));
 
-	GLCall(glEnableVertexAttribArray(0));
-	GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0));
+	GLCall(glEnableVertexAttribArray(1));
+	GLCall(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0));
 
 	unsigned int ibo;
 	GLCall(glCreateBuffers(1, &ibo));
 	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
 	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * 6 * 2, indices, GL_STATIC_DRAW));
-
 
 	ShaderProgramSource source = ParseShader("res/shaders/Basic.shader");
 	unsigned int shader = CreateShader(source.VertexSource, source.FragemntSource);
@@ -151,10 +160,20 @@ int main(int argc, char** argv) {
 	ASSERT(location != -1);
 	GLCall(glUniform4f(location, 0.3f, 0.3f, 0.8f, 1.0f));
 
+	GLCall(glBindVertexArray(0));
+	GLCall(glUseProgram(0));
+	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+	GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
+
 	float r = 0.8f;
 	float increment = 0.05f;
 	while (!glfwWindowShouldClose(window)) {
 		glClear(GL_COLOR_BUFFER_BIT);
+
+		GLCall(glUseProgram(shader));
+		GLCall(glBindVertexArray(VAO));
+		GLCall(glUniform4f(location, 0.3f, 0.3f, 0.8f, 1.0f));
+
 		GLCall(glUniform4f(location, r, 0.3f, 0.1f, 1.0f));
 		if (r > 1.0f)
 			increment = -0.05f;
