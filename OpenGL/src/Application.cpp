@@ -6,13 +6,14 @@
 #include <fstream>
 #include <sstream>
 
-#include "Renderer.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
 
 #include "VertexArray.h"		
+#include "VertexBufferLayout.h"
 #include "Shader.h"
 
+#include "Renderer.h"
 
 int main(int argc, char** argv) {
 
@@ -69,23 +70,22 @@ int main(int argc, char** argv) {
 		vb.Unbind();
 		ib.Unbind();
 
+		Renderer renderer; 
 		float r = 0.8f;
 		float increment = 0.05f;
 		while (!glfwWindowShouldClose(window)) {
-			glClear(GL_COLOR_BUFFER_BIT);
+			renderer.Clear();
 
 			shader.Bind();
 			shader.SetUniform4f("u_color", r, 0.3f, 0.8f, 1.0f);
 
-			va.Bind();
-			ib.Bind();
-
+			renderer.Draw(va, ib, shader);
 			if (r > 1.0f)
 				increment = -0.05f;
 			else if (r < 0.0f)
 				increment = 0.05f;
 			r += increment;
-			GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+
 			glfwSwapBuffers(window);
 			glfwPollEvents();
 		}
