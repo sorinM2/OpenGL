@@ -14,7 +14,7 @@
 #include "Shader.h"
 
 #include "Renderer.h"
-
+#include "Texture.h"
 int main(int argc, char** argv) {
 
 	GLFWwindow* window;
@@ -40,10 +40,10 @@ int main(int argc, char** argv) {
 	std::cout << glGetString(GL_VERSION) << std::endl;
 	{
 		float points[] = {
-			-0.5, -0.5,
-			0.5, -0.5,
-			0.5, 0.5,
-			-0.5, 0.5
+			-0.5f, -0.5f, 0.0f, 0.0f,
+			0.5f, -0.5f, 1.0f, 0.0f,		  
+			0.5f, 0.5f, 1.0f, 1.0f,
+			-0.5f, 0.5f, 0.0f, 1.0f
 		};
 
 		unsigned int indices[] = {
@@ -53,10 +53,11 @@ int main(int argc, char** argv) {
 
 
 		VertexArray va;
-		VertexBuffer vb(points, sizeof(float) * 4 * 2);
+		VertexBuffer vb(points, sizeof(float) * 4 * 4);
 		
 
 		VertexBufferLayout layout;
+		layout.Push<float>(2);
 		layout.Push<float>(2);
 		va.AddBuffer(vb, layout);
 		IndexBuffer ib(indices, 6);
@@ -64,6 +65,10 @@ int main(int argc, char** argv) {
 		Shader shader("res/shaders/Basic.shader");
 		shader.Bind();
 	
+
+		Texture texture("res/textures/ies.png");
+		texture.Bind();
+		shader.SetUniform1i("u_Texture", 0);
 
 		shader.Unbind();
 		va.Unbind();
@@ -77,7 +82,6 @@ int main(int argc, char** argv) {
 			renderer.Clear();
 
 			shader.Bind();
-			shader.SetUniform4f("u_color", r, 0.3f, 0.8f, 1.0f);
 
 			renderer.Draw(va, ib, shader);
 			if (r > 1.0f)
