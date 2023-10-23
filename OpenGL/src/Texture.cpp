@@ -1,6 +1,6 @@
 #include "Texture.h"	
 
-#include "vender/sdb_image/sdb_image.h"
+#include "sdb_image/sdb_image.h"
 
 Texture::Texture(const std::string& Path)
 	:m_RendereID(0), m_FilePath(Path), m_LocalBuffer(nullptr), m_Width(0), m_Height(0), m_BPP(0)

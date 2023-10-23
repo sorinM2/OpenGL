@@ -15,6 +15,10 @@
 
 #include "Renderer.h"
 #include "Texture.h"
+
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+
 int main(int argc, char** argv) {
 
 	GLFWwindow* window;
@@ -26,7 +30,7 @@ int main(int argc, char** argv) {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
 
 
-	window = glfwCreateWindow(1200, 800, "OpenGL", NULL, NULL);
+	window = glfwCreateWindow(960, 540, "OpenGL", NULL, NULL);
 
 	if (!window) {
 		glfwTerminate();
@@ -40,10 +44,10 @@ int main(int argc, char** argv) {
 	std::cout << glGetString(GL_VERSION) << std::endl;
 	{
 		float points[] = {
-			-0.5f, -0.5f, 0.0f, 0.0f,
-			0.5f, -0.5f, 1.0f, 0.0f,		  
-			0.5f, 0.5f, 1.0f, 1.0f,
-			-0.5f, 0.5f, 0.0f, 1.0f
+			200.0f, 200.0f, 0.0f, 0.0f,
+			400.0f, 200.0f, 1.0f, 0.0f,		  
+			400.0f, 400.0f, 1.0f, 1.0f,
+			200.0f, 400.0f, 0.0f, 1.0f
 		};
 
 		unsigned int indices[] = {
@@ -51,6 +55,8 @@ int main(int argc, char** argv) {
 			2, 3, 0
 		};
 
+		GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+		GLCall(glEnable(GL_BLEND));
 
 		VertexArray va;
 		VertexBuffer vb(points, sizeof(float) * 4 * 4);
@@ -62,13 +68,21 @@ int main(int argc, char** argv) {
 		va.AddBuffer(vb, layout);
 		IndexBuffer ib(indices, 6);
 
+
+		glm::mat4 proj = glm::ortho(0.0f, 960.0f, 0.0f, 540.f, -1.0f, 1.0f);	//* 2 = 4:3
+		glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(-100.0f, 0.0f, 0.0f));
+		glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(200.0f, 100.0f, 0.0f));
+
+		glm::mat4 MVP = proj * view * model;
+
 		Shader shader("res/shaders/Basic.shader");
 		shader.Bind();
 	
 
-		Texture texture("res/textures/ies.png");
+ 		Texture texture("res/textures/ba.png");
 		texture.Bind();
 		shader.SetUniform1i("u_Texture", 0);
+		shader.SetUniformMat4f("u_MVP", MVP);	
 
 		shader.Unbind();
 		va.Unbind();
@@ -76,19 +90,13 @@ int main(int argc, char** argv) {
 		ib.Unbind();
 
 		Renderer renderer; 
-		float r = 0.8f;
-		float increment = 0.05f;
+
 		while (!glfwWindowShouldClose(window)) {
 			renderer.Clear();
 
 			shader.Bind();
 
 			renderer.Draw(va, ib, shader);
-			if (r > 1.0f)
-				increment = -0.05f;
-			else if (r < 0.0f)
-				increment = 0.05f;
-			r += increment;
 
 			glfwSwapBuffers(window);
 			glfwPollEvents();
